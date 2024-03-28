@@ -1,6 +1,6 @@
 from random import randint
-
-
+from math import sqrt, floor
+# extended euclidean algorithm
 def xgcd(a:int, b:int) -> list:
     if a == 0:
         return b, 0, 1
@@ -8,9 +8,8 @@ def xgcd(a:int, b:int) -> list:
         gcd, x, y = xgcd(b % a, a)
         return [gcd, y - (b // a) * x, x]
 
-
+# miller rabin primality test
 def millerRabinPT(p:int, k:int = 5) -> bool:
-    is_prime = False
     if p == 2 or p == 3:
         return True
     
@@ -44,4 +43,22 @@ def millerRabinPT(p:int, k:int = 5) -> bool:
     return True
 
 
+class ContFrac:
+    def __init__(self, n:int, inc:int):
+        self.n = n
+        self.v = 1
+        self.alpha = sqrt(n)
+        self.a = floor(self.alpha) + inc
+        print("a init:",self.a)
+        self.u = self.a
+        self.frac = [self.a]
 
+    def getNext(self) -> int:
+        res = self.a
+        self.v = (self.n - self.u**2) // self.v
+        self.alpha = (sqrt(self.n) + self.u) / self.v
+        self.a = floor(self.alpha)
+        self.frac += [self.a]
+        self.u = self.a * self.v - self.u
+        return res
+        

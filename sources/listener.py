@@ -4,13 +4,14 @@ import logging
 from tools import millerRabinPT
 from factorization import trivialFactor, rpFactor
 
-
+#setup logging
 logging.basicConfig(level=logging.DEBUG)
 
+#setup some constants for remote communication
 q_,a_,e_,p_ = "[?]", "[*]", "[!]","[+]"
 
 
-
+#routine for handling client requests
 def routine(cs:socket) -> None:
     #factors to be found
     factors = []
