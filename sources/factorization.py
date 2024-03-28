@@ -1,7 +1,7 @@
 from sage.all import *
 import logging
 from tools import millerRabinPT as isPrime, ContFrac
-
+from fast_gauss import fastGauss
 logging.basicConfig(level=logging.DEBUG)
 
 TR_PRIMES = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47]
@@ -76,8 +76,6 @@ def cfrac(n:int) -> int:
     k = len(base)
     inc = 0
     logging.debug(f"k: {k}")
-    #frac = continued_fraction_list(sqrt(n)) # sagemath method, idk if I can use it
-    #getting enough flat numbers
     frac = ContFrac(n, inc)
     b = [0,1]
     b_pointer = 0
@@ -95,35 +93,32 @@ def cfrac(n:int) -> int:
         if bs > n//2: bs -= n
         vb = baseRepr(bs, base)
         if vb:
-            #logging.debug(f"ai: {ai}, bi: {bi}, bs: {bs}, p: {b_pointer}")
             b_s[bs] = bi
             vectors[bs] = vb
-
-    # logging.debug(f"b_s: {b_s}")
-    # logging.debug(f"vectors: {vectors}")
-    F = GF(2)
-    vs_m = [vector(F, v) for v in vectors.values()]
-    M = matrix(F, vs_m).transpose()
-    solution_space = M.right_kernel().basis()
-
+    # gaussian elimination using sagemath methods
+    #-----------------------------------
+    # F = GF(2)
+    # vs_m = [vector(F, v) for v in vectors.values()]
+    # M = matrix(F, vs_m).transpose()
+    # M.echelonize()
+    # solution_space = M.right_kernel().basis()
+    #-----------------------------------
+            
+            
+    # handwriten gaussian elimination
+    solution_space = fastGauss([v for v in vectors.values()])
     for i in solution_space:
         solv = list(i)
-        # logging.debug(f"solv: {solv}")
         Xv,Yv = [],[]
         for c,j in enumerate(solv):
             if j == 1:
                 Xv += [list(b_s.values())[c]]
                 Yv += [list(b_s.keys())[c]]   
-        #logging.debug(f"Xv: {Xv}, Yv: {Yv}")
         x = mul(Xv) % n 
         y = int(sqrt(mul(Yv))) % n
-        #logging.debug(f"x: {x}, y: {y}")
         if (x != y) and (x != -y + n):
             f1,f2 = gcd(x-y,n),gcd(x+y,n)
-            # logging.debug(b_s.values())
-            # logging.debug(f"Xv: {Xv}, Yv: {Yv}")
-            # logging.debug(f"Factors found: {f1}, {f2}")
             if 1 < f1 < n and 1 < f2 < n:
                 logging.debug(f"Factors found: {f1}, {f2}")
-                return gcd(x-y,n)#, gcd(x+y,n)
+                return gcd(x-y,n)
 

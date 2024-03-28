@@ -49,7 +49,6 @@ class ContFrac:
         self.v = 1
         self.alpha = sqrt(n)
         self.a = floor(self.alpha) + inc
-        print("a init:",self.a)
         self.u = self.a
         self.frac = [self.a]
 
