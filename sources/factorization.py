@@ -88,7 +88,6 @@ def cfrac(n:int) -> int:
             break
         ai = frac.getNext()
         bi = (ai*b[b_pointer+1] + b[b_pointer]) % n
-        print("b:",bi)
 
         b_pointer += 1
         b += [bi]
@@ -96,8 +95,6 @@ def cfrac(n:int) -> int:
         if bs > n//2: bs -= n
         vb = baseRepr(bs, base)
         if vb:
-            logging.debug(bs)
-            print(vb)
             #logging.debug(f"ai: {ai}, bi: {bi}, bs: {bs}, p: {b_pointer}")
             b_s[bs] = bi
             vectors[bs] = vb
@@ -123,13 +120,10 @@ def cfrac(n:int) -> int:
         #logging.debug(f"x: {x}, y: {y}")
         if (x != y) and (x != -y + n):
             f1,f2 = gcd(x-y,n),gcd(x+y,n)
-            logging.debug(b_s.values())
-            logging.debug(f"Xv: {Xv}, Yv: {Yv}")
-            logging.debug(f"Factors found: {f1}, {f2}")
-            break
+            # logging.debug(b_s.values())
+            # logging.debug(f"Xv: {Xv}, Yv: {Yv}")
+            # logging.debug(f"Factors found: {f1}, {f2}")
             if 1 < f1 < n and 1 < f2 < n:
                 logging.debug(f"Factors found: {f1}, {f2}")
-                return gcd(x-y,n), gcd(x+y,n)
+                return gcd(x-y,n)#, gcd(x+y,n)
 
-def bmFactor(n:int) -> int:
-    pass

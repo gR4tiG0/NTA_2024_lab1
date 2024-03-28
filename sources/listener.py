@@ -2,16 +2,15 @@
 import socket
 import logging
 from tools import millerRabinPT
-from factorization import trivialFactor, rpFactor
+from factorization import trivialFactor, rpFactor, cfrac
 
-#setup logging
+
 logging.basicConfig(level=logging.DEBUG)
 
-#setup some constants for remote communication
 q_,a_,e_,p_ = "[?]", "[*]", "[!]","[+]"
 
 
-#routine for handling client requests
+
 def routine(cs:socket) -> None:
     #factors to be found
     factors = []
@@ -58,9 +57,7 @@ def routine(cs:socket) -> None:
     if factors != []:
         cs.sendall(f"{p_} Factors found using trivial division method: {factors}\n".encode('utf-8'))
     else:
-        cs.sendall(f"{e_} Trivial division method did not give any results\n".encode('utf-8'))
-
-    
+        cs.sendall(f"{e_} Trivial division method did not give any results\n".encode('utf-8'))    
     
     
 
@@ -77,9 +74,25 @@ def routine(cs:socket) -> None:
     else:
         cs.sendall(f"{e_} Pollard's Rho method did not give any results\n".encode('utf-8'))
 
+    cs.sendall(f"{q_} Starting primalty test for {n}...(again)\n".encode('utf-8'))
+    mr_resp = millerRabinPT(n)
+    while not mr_resp:
 
+        cs.sendall(f"{a_} N is composite, starting continued fraction factorization method (CFRAC)\n".encode('utf-8'))
+        logging.debug(f"Starting continued fraction factorization method...")
+        factor = cfrac(n)
+        if factor:
+            n //= factor
+            factors += [factor]
+            cs.sendall(f"{p_} Factor found using CFRAC method: {factor}\n".encode('utf-8'))
+        else:
+            cs.sendall(f"{e_} CFRAC method did not give any results\n".encode('utf-8'))
+            break
+        mr_resp = millerRabinPT(n)
 
-
+    cs.sendall(f"{e_} N is prime, adding factor {n}\n".encode('utf-8'))
+    factors += [n]
+    cs.sendall(f"{e_} Factorization complete: {factors}\n".encode('utf-8'))
 
 
 
