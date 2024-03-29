@@ -3,6 +3,7 @@ import socket
 import logging
 from tools import millerRabinPT
 from factorization import trivialFactor, rpFactor, cfrac
+import time
 
 
 logging.basicConfig(level=logging.DEBUG)
@@ -15,7 +16,6 @@ def routine(cs:socket) -> None:
     #factors to be found
     factors = []
 
-
     #getting the number from the client
     cs.sendall(f"{q_} n: ".encode('utf-8'))
     n = int(cs.recv(1024).decode('utf-8').strip())
@@ -23,6 +23,7 @@ def routine(cs:socket) -> None:
 
 
 
+    gl_time_start = time.time()
     logging.debug(f"N entered: {n}")
     logging.debug(f"Checking if prime...")
 
@@ -62,8 +63,11 @@ def routine(cs:socket) -> None:
     
 
     cs.sendall(f"{a_} Starting Pollard's Rho method...\n".encode('utf-8'))
-
+    rp_start = time.time()
     factor = rpFactor(n)
+    rp_end = time.time()
+    logging.debug(f"Pollard's Rho time elapsed: {rp_end - rp_start}")
+    cs.sendall(f"{e_} Pollard's Rho time elapsed: {rp_end - rp_start} seconds\n".encode('utf-8'))
     if factor != 1:
         logging.debug(f"Factor found: {factor}")
 
@@ -80,7 +84,11 @@ def routine(cs:socket) -> None:
 
         cs.sendall(f"{a_} N is composite, starting continued fraction factorization method (CFRAC)\n".encode('utf-8'))
         logging.debug(f"Starting continued fraction factorization method...")
+        cfrac_start = time.time()
         factor = cfrac(n)
+        cfrac_end = time.time()
+        logging.debug(f"CFRAC time elapsed: {cfrac_end - cfrac_start}")
+        cs.sendall(f"{e_} CFRAC time elapsed: {cfrac_end - cfrac_start} seconds\n".encode('utf-8'))
         if factor:
             n //= factor
             factors += [factor]
@@ -93,7 +101,9 @@ def routine(cs:socket) -> None:
     cs.sendall(f"{e_} N is prime, adding factor {n}\n".encode('utf-8'))
     factors += [n]
     cs.sendall(f"{e_} Factorization complete: {factors}\n".encode('utf-8'))
-
+    gl_time_end = time.time()
+    logging.info(f"Total time elapsed: {gl_time_end - gl_time_start} seconds")
+    cs.sendall(f"{e_} Total time elapsed: {gl_time_end - gl_time_start} seconds\n".encode('utf-8'))
 
 
 def main() -> None:
